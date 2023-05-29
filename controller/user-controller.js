@@ -1,4 +1,6 @@
 const {Register}  = require ('../model/auth-model')
+const transporter = require("../helpers/mail.config");
+
 
 const getAllUser = async (req, res, next) => {
     try {
@@ -38,12 +40,21 @@ const getUserByEmail =  async (req,res,next)=>{
 
 const updateUser = async (req, res, next) => {
     try {
-        const {
+        const{
             fullName,
             email,
             employeeId,
-            role
-        } = req.body;
+            designation,
+            phoneNumber,
+            department,
+            gender,
+            benchHiring,
+            marketHiring,
+            resourcePool,
+            managementSystem,
+            pssystem,
+            clientOnBoard
+        }=req.body;
 
         const updateUserdata = await Register.findOneAndUpdate({
             _id: req.params.id
@@ -51,26 +62,68 @@ const updateUser = async (req, res, next) => {
             fullName,
             email,
             employeeId,
-            role
+            designation,
+            phoneNumber,
+            department,
+            gender,
+            benchHiring,
+            marketHiring,
+            resourcePool,
+            managementSystem,
+            pssystem,
+            clientOnBoard
         }, {
             new: true
         });
-        if (updateUserdata) {
-            res.status(200).json({
-                error: false,
-                message: "User Updated Successfully",
-                response: updateUserdata
-            })
-
-        } else {
-            res.status(200).json({
-                error: true,
-                message: "Some thing went wrong",
-            })
+       if(updateUserdata){
+        const notificationArray = []  
+        const finalArray = []                                                                                                                   
+       notificationArray.push(updateUserdata.benchHiring,updateUserdata.marketHiring,updateUserdata.resourcePool, updateUserdata.managementSystem , updateUserdata.pssystem , updateUserdata.clientOnBoard)
+       notificationArray.forEach((ele)=>{
+        if(ele !== ''){
+          finalArray.push(ele)
         }
-    } catch (err) {
-        next(err)
+       })
+       const mailOptions = {
+        from: process.env.Email,
+        to: email,
+        subject: "Upadte Credentials of Technoelevate - SSO",
+        html: `<b>Hello, <strong>${fullName}</strong><br><br><br>
+        You are Access Credentials have been updated for Technoelevate Single Sign-On Application<br><br>
+        To the following applications ::   ${finalArray}  <br><br>
+    
+        Your Login Credentials:<br><br>
+        <strong>Email-Id : ${email}</strong><br>
+        <strong>password : otp will send to the registered email id.`,
+      };
+
+      transporter.sendMail(mailOptions, async (err) => {
+        if (!err) {
+          res.status(200).json({
+            error: false,
+            message: "User Updated and  Email Sent successfully",
+            response:updateUserdata
+          });
+        } 
+        else {
+          res.status(500).json({
+            error: true,
+            message: "Something went wrong! Please try again later",
+          });
+        }
+      });
     }
+     else {
+          res.status(400).json({
+              error:false,
+              message:'User already exists',
+          })
+      }
+    } catch (err) {
+        next(err.message);
+    }
+
+
 };
 
 
