@@ -9,21 +9,68 @@ const register = async (req, res, next) => {
             fullName,
             email,
             employeeId,
-            role
+            designation,
+            phoneNumber,
+            department,
+            gender,
+            benchHiring,
+            marketHiring,
+            resourcePool,
+            managementSystem,
+            pssystem,
+            clientOnBoard
         }=req.body;
         const data = await Register.findOne({email:email})
         if (!data) {
             const response = await Register.create({
-                fullName,
-                email,
-                employeeId,
-                role
+              fullName,
+              email,
+              employeeId,
+              designation,
+              phoneNumber,
+              department,
+              gender,
+              benchHiring,
+              marketHiring,
+              resourcePool,
+              managementSystem,
+              pssystem,
+              clientOnBoard
             })
+            const notificationArray = []  
+            const finalArray = []                                                                                                                   
+           notificationArray.push(response.benchHiring,response.marketHiring,response.resourcePool, response.managementSystem , response.pssystem , response.clientOnBoard)
+           notificationArray.forEach((ele)=>{
+            if(ele !== ''){
+              finalArray.push(ele)
+            }
+           })
+          const mailOptions = {
+          from: process.env.Email,
+          to: email,
+          subject: "Registration of SSO",
+          html: `<b>Hello, <strong>${fullName}</strong><br><br><br>
+          You are successfully registered for Technoelevate Single Sign-On Application<br><br>
+          You have access to the following applications ::   ${finalArray}  <br><br>
+      
+          Your Login Credentials:<br><br>
+          <strong>Email-Id : ${email}</strong><br>
+          <strong>password : otp will send to the registered email id.`,
+        };
+        transporter.sendMail(mailOptions, async (err) => {
+          if (!err) {
             res.status(200).json({
-                error:false,
-                message:'User Added Successfully',
-                response:response
-            })
+              error: false,
+              message: " User Added and  Email Sent successfully",
+              response:email
+            });
+          } else {
+            res.status(500).json({
+              error: true,
+              message: "Something went wrong! Please try again later",
+            });
+          }
+        });
         }else{
             res.status(400).json({
                 error:false,

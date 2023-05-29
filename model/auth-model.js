@@ -14,8 +14,35 @@ const registerSchema = new Schema({
     employeeId:{
         type: String,
     },
-    role:{
+    designation:{
        type: String,
+    },
+    phoneNumber:{
+        type:Number
+    },
+    department:{
+        type:String
+    },
+    gender:{
+        type:String
+    },
+    benchHiring:{
+        type:String
+    },
+    marketHiring:{
+        type:String
+    },
+    resourcePool:{
+        type:String
+    },
+    managementSystem:{
+        type:String
+    },
+    pssystem:{
+        type:String
+    },
+    clientOnBoard:{
+        type:String
     },
     otp:{
         type: Number,
